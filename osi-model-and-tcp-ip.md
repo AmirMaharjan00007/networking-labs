@@ -285,3 +285,142 @@ procedural specifications.
 As data travels down the OSI layers from sender, each layer
 adds its own header (and sometimes trailer) — this is called
 encapsulation.
+Application data
+↓ + Application header
+Segment (Transport layer adds port numbers)
+↓ + Transport header
+Packet (Network layer adds IP addresses)
+↓ + Network header
+Frame (Data Link layer adds MAC addresses)
+↓ + Data Link header + trailer
+Bits (Physical layer converts to signals)
+
+At the receiver the process reverses — each layer removes
+its header and passes data up — called de-encapsulation.
+
+**Why this matters for security:**
+- Deep packet inspection analyses headers at multiple layers
+- Firewalls filter based on headers at layers 3 and 4
+- Intrusion detection systems analyse patterns across layers
+- Encryption at layer 6 protects payload but headers may
+  still be visible
+
+---
+
+## 4. TCP/IP Model
+
+The TCP/IP model is the practical model used on the internet.
+It has four layers that map to the OSI seven layers:
+
+| TCP/IP Layer | OSI Equivalent | Key Protocols |
+|-------------|----------------|---------------|
+| Application | Layers 5, 6, 7 | HTTP, FTP, DNS, SMTP, SSH |
+| Transport | Layer 4 | TCP, UDP |
+| Internet | Layer 3 | IP, ICMP, ARP |
+| Network Access | Layers 1, 2 | Ethernet, WiFi, MAC |
+
+---
+
+## 5. Key Protocols — Detailed
+
+### DNS — Domain Name System
+- Translates human-readable domain names to IP addresses
+- Example: waikato.ac.nz → 130.217.x.x
+- Hierarchical distributed database
+- DNS query types: A, AAAA, MX, CNAME, NS, PTR
+
+**DNS security issues:**
+- DNS cache poisoning — injecting false records
+- DNS amplification DDoS — using DNS for traffic amplification
+- DNS tunnelling — hiding data in DNS queries
+- typosquatting — registering similar domain names
+
+**DNS security solutions:**
+- DNSSEC — digitally signs DNS records
+- DNS over HTTPS (DoH) — encrypts DNS queries
+- DNS over TLS (DoT) — encrypts DNS queries
+- Monitoring DNS queries for anomalies
+
+### DHCP — Dynamic Host Configuration Protocol
+- Automatically assigns IP addresses to devices
+- Eliminates manual IP configuration
+- Assigns: IP address, subnet mask, default gateway, DNS server
+
+**DHCP security issues:**
+- DHCP starvation — exhausting IP address pool
+- Rogue DHCP server — attacker distributes false network config
+- Man in the middle via rogue DHCP
+
+**DHCP security solutions:**
+- DHCP snooping on switches
+- Static IP for critical devices
+- Monitor for rogue DHCP servers
+
+### HTTP vs HTTPS
+| Feature | HTTP | HTTPS |
+|---------|------|-------|
+| Encryption | None | TLS/SSL encryption |
+| Port | 80 | 443 |
+| Data visibility | Visible in transit | Encrypted in transit |
+| Certificate | Not required | Required |
+| Use | Should be avoided | Standard for all websites |
+
+---
+
+## 6. Subnetting Basics
+
+Subnetting divides a large network into smaller subnetworks
+for better management, performance, and security.
+
+### CIDR Notation
+- /24 = 255.255.255.0 = 256 addresses (254 usable)
+- /25 = 255.255.255.128 = 128 addresses (126 usable)
+- /26 = 255.255.255.192 = 64 addresses (62 usable)
+- /16 = 255.255.0.0 = 65,536 addresses
+- /8 = 255.0.0.0 = 16,777,216 addresses
+
+### Private IP Address Ranges
+Reserved for internal network use — not routable on internet:
+- 10.0.0.0/8 — Class A private
+- 172.16.0.0/12 — Class B private
+- 192.168.0.0/16 — Class C private (most common home/small office)
+
+### Why Subnetting Matters for Security
+- Network segmentation through subnetting limits attack spread
+- Critical systems placed on isolated subnets
+- Firewall rules applied between subnets
+- Attacker who compromises one subnet cannot automatically
+  reach devices on other subnets
+
+---
+
+## 7. Practical Application — Internship Experience
+
+During my IT Systems Administrator internship at Addon Engineering
+Solutions I applied OSI and TCP/IP knowledge directly:
+
+**Troubleshooting using OSI model:**
+When network issues occurred I used the OSI model systematically:
+- Layer 1 first — is the cable connected? Is the port light on?
+- Layer 2 — is the switch seeing the MAC address?
+- Layer 3 — is the IP address correctly assigned?
+- Layer 4 — is the correct port open and accessible?
+- Layer 7 — is the application correctly configured?
+
+This systematic approach significantly reduced troubleshooting
+time compared to random trial and error.
+
+**Protocol knowledge in practice:**
+- DNS issues frequently caused connectivity problems that appeared
+  as Layer 7 application failures but were actually Layer 3
+  protocol issues
+- Understanding TCP three way handshake helped diagnose connection
+  timeout issues
+- Port knowledge was essential for firewall rule configuration
+  and access control management
+
+---
+
+*Last updated: May 2026*
+*Amir Maharjan — Kathmandu, Nepal*
+
