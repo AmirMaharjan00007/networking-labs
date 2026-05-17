@@ -91,6 +91,7 @@ IT Systems Administrator internship:
 | `cisco-configurations.md` | Cisco IOS CLI commands and configurations |
 | `vlans-and-switching.md` | VLAN concepts, configuration, inter-VLAN routing |
 | `routing-protocols.md` | RIP, OSPF, BGP concepts and configuration |
+| `network-security.md` | firewalls and IDS, vpn and encryption, wireless security, and network security practices|
 
 ---
 
