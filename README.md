@@ -17,8 +17,7 @@ During my studies I completed two dedicated networking modules:
 
 - **Networking** — Pearson BTEC Level 5 HND in Computing
   (Software Engineering) at ISMT College Kathmandu
-- **Network Security** — Pearson BTEC Level 5 HND in Computing
-  (Software Engineering) at ISMT College Kathmandu
+- **Network Security** — University of Sunderland, Bachelors in Computer Systems Engineering at ISMT College,Kathmandu
 
 During my six month IT Systems Administrator internship at Addon
 Engineering Solutions, Kathmandu (September 2024 to February 2025)
