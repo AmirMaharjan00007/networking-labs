@@ -1,7 +1,8 @@
 # VLANs and Switching
 
 Notes from Networking and Network Security modules
-Pearson BTEC Level 5 HND in Computing (Software Engineering)
+Pearson BTEC Level 5 HND in Computing (Software Engineering),
+Bachelors in Computer Systems Engineering,
 ISMT College Kathmandu — Amir Maharjan
 
 ---
