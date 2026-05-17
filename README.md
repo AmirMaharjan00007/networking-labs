@@ -41,7 +41,7 @@ Key areas covered:
 - Network hardware — routers, switches, hubs, access points
 - Cisco Packet Tracer network simulation
 
-### Network Security — BTEC Level 5 HND
+### Network Security — Bachelors in Computer Systems Engineering
 Key areas covered:
 - Network security threats and attack vectors
 - Firewall configuration and management
