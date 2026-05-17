@@ -1,0 +1,300 @@
+# Routing Protocols
+
+Notes from Networking module — Pearson BTEC Level 5 HND
+in Computing (Software Engineering)
+ISMT College Kathmandu — Amir Maharjan
+
+---
+
+## 1. What is Routing?
+
+Routing is the process of selecting the best path for
+network traffic to travel from source to destination
+across one or more networks.
+
+A router makes forwarding decisions based on:
+- Destination IP address in packet header
+- Routing table — map of known networks and how to reach them
+- Routing protocol metrics — cost, hop count, bandwidth
+
+---
+
+## 2. Types of Routing
+
+### Static Routing
+- Routes manually configured by administrator
+- Does not change automatically if network topology changes
+- Suitable for small networks with simple topology
+- Lower CPU and bandwidth overhead
+- Security benefit — no routing protocol traffic to intercept
+
+! Static route syntax
+R1(config)# ip route [destination] [mask] [next-hop or exit-interface]
+! Example — route to 10.0.0.0/8 via 192.168.1.254
+R1(config)# ip route 10.0.0.0 255.0.0.0 192.168.1.254
+! Default route — matches all destinations
+R1(config)# ip route 0.0.0.0 0.0.0.0 203.0.113.2
+! Verify
+R1# show ip route static
+
+### Dynamic Routing
+- Routers automatically discover routes and share with neighbours
+- Adapts automatically to network topology changes
+- Suitable for larger more complex networks
+- Requires more CPU and bandwidth
+- Routing protocol runs continuously
+
+### Administrative Distance
+When multiple routing sources know about the same network
+administrative distance determines which is preferred:
+
+| Source | Administrative Distance |
+|--------|------------------------|
+| Connected interface | 0 |
+| Static route | 1 |
+| OSPF | 110 |
+| RIP | 120 |
+| Unknown | 255 — unusable |
+
+Lower administrative distance = more trusted = preferred
+
+---
+
+## 3. RIP — Routing Information Protocol
+
+RIP is a distance vector routing protocol — routers share
+their entire routing table with directly connected neighbours.
+
+### RIP Characteristics
+- Metric: Hop count — number of routers to destination
+- Maximum hop count: 15 — destinations beyond 15 hops
+  are unreachable
+- Updates: Broadcasts full routing table every 30 seconds
+- Convergence: Slow — can take minutes after topology change
+- Versions: RIPv1 (classful) and RIPv2 (classless — supports CIDR)
+
+### RIP Configuration
+
+R1(config)# router rip
+R1(config-router)# version 2
+R1(config-router)# no auto-summary
+R1(config-router)# network 192.168.1.0
+R1(config-router)# network 10.0.0.0
+R1(config-router)# passive-interface GigabitEthernet0/1
+R1(config-router)# exit
+! Verify
+R1# show ip protocols
+R1# show ip route rip
+R1# debug ip rip                    ! Show RIP updates in real time
+R1# undebug all                     ! Stop debugging
+
+### RIP Security Issues
+- No authentication by default — routes can be injected
+- Broadcasts routing table — information disclosure
+- Slow convergence creates window for routing attacks
+- Maximum 15 hops limits scalability
+
+### RIP Authentication
+
+R1(config)# key chain RIP_KEYS
+R1(config-keychain)# key 1
+R1(config-keychain-key)# key-string MyR1pK3y
+R1(config-keychain-key)# exit
+R1(config-keychain)# exit
+R1(config)# interface GigabitEthernet0/0
+R1(config-if)# ip rip authentication mode md5
+R1(config-if)# ip rip authentication key-chain RIP_KEYS
+
+---
+
+## 4. OSPF — Open Shortest Path First
+
+OSPF is a link state routing protocol — routers build a
+complete map of the network topology and calculate best
+paths independently.
+
+### OSPF Characteristics
+- Metric: Cost — based on interface bandwidth
+- No hop count limit — scales to large networks
+- Fast convergence — detects changes quickly
+- Sends updates only when topology changes — not periodic
+- Uses areas to scale large networks
+- Industry standard — widely used in enterprise networks
+
+### OSPF Cost Calculation
+Cost = Reference bandwidth / Interface bandwidth
+Default reference bandwidth = 100 Mbps
+
+| Interface | Bandwidth | Cost |
+|-----------|-----------|------|
+| Serial | 1.544 Mbps | 64 |
+| FastEthernet | 100 Mbps | 1 |
+| GigabitEthernet | 1000 Mbps | 1 |
+
+*Note: FastEthernet and GigabitEthernet both show cost 1
+with default reference bandwidth — adjust reference
+bandwidth for accurate cost calculation*
+
+### OSPF Areas
+- **Area 0 (Backbone)** — all OSPF networks must connect
+  to or through area 0
+- **Regular areas** — connect to area 0
+- Areas reduce routing table size and limit LSA flooding
+
+### OSPF Configuration
+
+! Basic single area OSPF
+R1(config)# router ospf 1
+R1(config-router)# router-id 1.1.1.1
+R1(config-router)# network 192.168.1.0 0.0.0.255 area 0
+R1(config-router)# network 10.0.0.0 0.255.255.255 area 0
+R1(config-router)# passive-interface GigabitEthernet0/1
+R1(config-router)# auto-cost reference-bandwidth 1000
+R1(config-router)# exit
+! Verify OSPF
+R1# show ip ospf
+R1# show ip ospf neighbor
+R1# show ip ospf database
+R1# show ip route ospf
+R1# show ip ospf interface GigabitEthernet0/0
+
+### OSPF Authentication
+
+! MD5 authentication per interface
+R1(config)# interface GigabitEthernet0/0
+R1(config-if)# ip ospf authentication message-digest
+R1(config-if)# ip ospf message-digest-key 1 md5 0spfP@ssw0rd
+R1(config-if)# exit
+
+### OSPF vs RIP Comparison
+
+| Feature | RIP | OSPF |
+|---------|-----|------|
+| Type | Distance vector | Link state |
+| Metric | Hop count | Cost (bandwidth) |
+| Max hops | 15 | Unlimited |
+| Convergence | Slow | Fast |
+| Updates | Every 30 seconds | On change only |
+| Scalability | Small networks | Large networks |
+| CPU/Memory | Low | Higher |
+| Standard | Open | Open |
+
+---
+
+## 5. BGP — Border Gateway Protocol
+
+BGP is the routing protocol of the internet — used between
+different autonomous systems (AS) — different organisations
+or ISPs.
+
+### BGP Characteristics
+- Path vector protocol — tracks AS path to prevent loops
+- Highly configurable — extensive policy control
+- Slow convergence by design — stability over speed
+- Used by ISPs and large enterprises
+- Not typically configured by entry-level administrators
+- Understanding BGP important for cybersecurity —
+  BGP hijacking is a significant internet-level threat
+
+### BGP Security Issues
+- BGP hijacking — malicious or accidental announcement
+  of wrong routes causes traffic redirection
+- No built-in authentication in original BGP
+- RPKI (Resource Public Key Infrastructure) helps
+  validate route origins
+- BGP route leaks can cause widespread internet disruption
+
+---
+
+## 6. Routing Security Best Practices
+
+### General Routing Security
+- Use authentication on all routing protocols
+- Use passive-interface on interfaces that should not
+  send routing updates
+- Apply ACLs to filter routing updates
+- Monitor routing table for unexpected changes
+- Use static routes where topology is simple and stable
+
+### Passive Interface
+Prevents routing updates being sent out an interface
+while still advertising the connected network:
+
+! Stop RIP updates going to end user network
+R1(config)# router rip
+R1(config-router)# passive-interface GigabitEthernet0/0
+R1(config-router)# exit
+! Stop OSPF hello packets on interface
+R1(config)# router ospf 1
+R1(config-router)# passive-interface GigabitEthernet0/0
+
+### Route Filtering
+
+! Create prefix list to filter routes
+R1(config)# ip prefix-list FILTER_IN seq 5 deny 10.0.0.0/8
+R1(config)# ip prefix-list FILTER_IN seq 10 permit 0.0.0.0/0 le 32
+! Apply to routing protocol
+R1(config)# router ospf 1
+R1(config-router)# distribute-list prefix FILTER_IN in
+
+---
+
+## 7. Routing Table Analysis
+
+Understanding the routing table is essential for
+troubleshooting and security analysis.
+
+R1# show ip route
+! Output interpretation:
+! C — Connected network
+! S — Static route
+! R — RIP route
+! O — OSPF route
+! * — Candidate default route
+! Example output:
+! C    192.168.1.0/24 is directly connected, GigabitEthernet0/0
+! S    10.0.0.0/8 [1/0] via 192.168.1.254
+! R    172.16.0.0/16 [120/2] via 192.168.1.253
+! O    192.168.2.0/24 [110/2] via 192.168.1.252
+! S*   0.0.0.0/0 [1/0] via 203.0.113.2
+
+**Reading the route entry:**
+`O 192.168.2.0/24 [110/2] via 192.168.1.252`
+- O = OSPF learned route
+- 192.168.2.0/24 = destination network
+- [110/2] = [administrative distance/metric]
+- via 192.168.1.252 = next hop router
+
+---
+
+## 8. Troubleshooting Routing
+
+### Systematic Approach Using OSI Model
+
+! Step 1 — Check physical connectivity
+R1# show interfaces GigabitEthernet0/0
+! Step 2 — Check IP addressing
+R1# show ip interface brief
+! Step 3 — Check routing table
+R1# show ip route
+! Step 4 — Test connectivity
+R1# ping 192.168.2.1
+R1# traceroute 192.168.2.1
+! Step 5 — Check routing protocol
+R1# show ip protocols
+R1# show ip ospf neighbor
+
+### Common Routing Problems
+
+| Problem | Symptom | Check |
+|---------|---------|-------|
+| Interface down | Route missing from table | show interfaces |
+| Wrong subnet mask | Partial connectivity | show ip interface |
+| Missing network statement | Route not advertised | show ip protocols |
+| Authentication mismatch | Neighbour not forming | show ip ospf neighbor |
+| ACL blocking traffic | Ping fails with route present | show access-lists |
+
+---
+
+*Last updated: May 2026*
+*Amir Maharjan — Kathmandu, Nepal*
